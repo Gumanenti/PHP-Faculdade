@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <title>Revisão Ajax</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+
+        function clicouDeletar(event){
+            var idBotaoClicado = event;
+            console.log(idBotaoClicado);
+            let urlSerie = "https://api.tvmaze.com/shows/"+idBotaoClicado+"/episodes"
+                console.log(urlSerie);
+                $.ajax({
+                    url: urlSerie,
+                    method: "GET",
+                    data: "json",
+                    success: function(dados){
+                        let corpoTabela = $("<tbody>");
+                        let tabela = $("<table>");
+                        let divCentro = $("#div-centro");
+                        for(i=0;i<dados.length;i++){
+                            let linha = $("<tr>");
+                            let campoTemporada = $("<td>").html(dados[i].season);
+                            linha.append(campoTemporada);
+                            let campoEpisodio = $("<td>").html(dados[i].number);
+                            linha.append(campoEpisodio);
+                            let campoNome = $("<td>").html(dados[i].name);
+                            linha.append(campoNome);
+                            let campoData = $("<td>").html(dados[i].airdate);
+                            linha.append(campoData);
+                            corpoTabela.append(linha)
+                        }
+                        let cabeçalho = $("<thead>").html("<tr><td>Temporada</td><td>Episódio</td><td>Nome</td><td>Data</td></tr>");
+                        tabela.addClass("table");
+                        tabela.append(cabeçalho);
+                        tabela.append(corpoTabela);
+                        divCentro.html(tabela);
+                    }
+                });
+        }
+
+        $(document).ready(function(){
+            let inputFormulario = document.querySelector("#inputFormulario");
+            let formulario = document.querySelector("#formulario");
+        
+            formulario.addEventListener("submit", function(event){
+            let valorInputFormulario = inputFormulario.value;
+            console.log(valorInputFormulario);
+            event.preventDefault();
+
+            let cabeçalho = $("#cabeçalho");
+            let tr = $("<tr>");
+            let td = '<td>Temporada</td><td>Episódio</td><td>Nome</td><td>Data</td>';
+            tr.html(td);
+            cabeçalho.append(tr);
+
+            let url = `https://api.tvmaze.com/search/shows?q=${valorInputFormulario}`;
+            console.log(url);
+            $.ajax({
+            url: url,
+            method: "GET",
+            data: "json",
+            success: function(dados){
+                console.log("Deu certo");
+                let idSerie;
+                let divSeries = $("#div-series");
+                let ul = $("<ul>");
+                let programasEncontrados = $("<h3>").html("Programas Encontrados:");
+                    ul.append(programasEncontrados);
+                for(i=0;i<dados.length;i++){
+                    console.log(dados[i].show.name);
+                        console.log("Nadaaaaa");
+                        console.log("Aqui tem algo: "+dados[i].show.id);
+                        let li = '<li id="'+dados[i].show.id+'" onclick="clicouDeletar(this.id)">"'+dados[i].show.name+'"</li>';
+                        console.log(li);
+                        ul.append(li);
+
+                    
+
+                    if(dados[i].name == valorInputFormulario){
+                        idSerie = dados[i].id;
+                        console.log(idSerie);
+                    }
+                }
+                divSeries.html(ul);
+            }
+            });
+
+        });
+        });
+    </script>
+</head>
+
+<body>
+      <div class="container">
+        <div class="row">
+          <div class="col-3" id="lado-esquerdo">
+          </div>
+          <div class="col-6" id="centro">
+              <form id="formulario">
+                <label for="serie">Procure o Programa de tv:</label>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="inputFormulario" placeholder="Senha">
+                </div>
+                <button type="submit" class="btn btn-primary">Procurar</button>
+              </form>
+              <div id="div-series"></div>
+              <div id="div-centro"></div>
+          </div>
+          <div class="col-3" id="lado-direito">
+          </div>
+        </div>
+      </div>
+</body>
+
+</html>
